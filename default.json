@@ -1,0 +1,48 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "labels": [
+        "changelog:dependencies"
+    ],
+    "branchConcurrentLimit": 1,
+    "dependencyDashboard": false,
+    "minimumReleaseAge": "3 days",
+    "reviewersFromCodeOwners": true,
+    "semanticCommits": "enabled",
+    "hostRules": [
+        {
+            "matchHost": "github.com",
+            "hostType": "github",
+            "token": "{{ secrets.BLUEBEETLE_BOT_PAT }}"
+        },
+        {
+            "matchHost": "github.com",
+            "hostType": "packagist",
+            "token": "{{ secrets.BLUEBEETLE_BOT_PAT }}"
+        },
+        {
+            "matchHost": "packages.eufaturo.pt",
+            "hostType": "packagist",
+            "username": "eufaturo",
+            "password": "{{ secrets.SATIS_PASSWORD }}"
+        },
+        {
+            "matchHost": "https://npm.pkg.github.com/",
+            "hostType": "npm",
+            "token": "{{ secrets.BLUEBEETLE_BOT_PAT }}"
+        }
+    ],
+    "packageRules": [
+        {
+            "description": "Runtime versions managed via docker-dev bump scripts",
+            "matchDepNames": [
+                "php",
+                "node",
+                "@types/node",
+                "pnpm",
+                "npm",
+                "serversideup/php"
+            ],
+            "enabled": false
+        }
+    ]
+}
