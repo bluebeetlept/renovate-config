@@ -54,6 +54,14 @@
             ]
         },
         {
+            "description": "Testbench follows the Laravel version it targets",
+            "groupName": "Laravel and Testbench",
+            "matchPackageNames": [
+                "laravel/framework",
+                "orchestra/testbench{/,}**"
+            ]
+        },
+        {
             "description": "Pest 4 runs on PHPUnit 12",
             "matchPackageNames": [
                 "phpunit/phpunit"
