@@ -25,11 +25,13 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      # The checkout reads with the job's own token and keeps no credentials, so the
+      # npm package run below can't find a token; BOT_TOKEN only enters the push step.
       - name: Checkout the pull request branch
         uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.BOT_TOKEN }}
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v7.1.0
@@ -37,6 +39,8 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Run biome migrate
+        env:
+          npm_config_ignore_scripts: "true"
         run: |
           version=$(node -p "const p = require('./package.json'); (p.devDependencies ?? {})['@biomejs/biome'] ?? (p.dependencies ?? {})['@biomejs/biome'] ?? ''")
 
@@ -48,6 +52,10 @@ jobs:
           npx --yes "@biomejs/biome@${version}" migrate --write
 
       - name: Commit the updated configuration
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           if [ -z "$(git status --porcelain -- biome.json biome.jsonc)" ]; then
             echo "The Biome configuration is already up to date."
@@ -63,4 +71,4 @@ jobs:
           done
 
           git commit -m "chore(deps): run biome migrate"
-          git push
+          git push "https://x-access-token:${BOT_TOKEN}@github.com/${REPOSITORY}.git" "HEAD:refs/heads/${BRANCH}"
