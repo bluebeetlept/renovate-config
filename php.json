@@ -1,0 +1,7 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "description": "Lock files are updated on the PHP version the docker-dev containers run, not the newest one composer.json allows. Bump it by hand when the containers move to a new PHP version.",
+    "constraints": {
+        "php": "8.4.*"
+    }
+}
