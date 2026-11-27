@@ -17,6 +17,11 @@ Reference this config in your repository's `renovate.json`:
 }
 ```
 
+## Presets
+
+- `default.json`: the shared settings, used with `local>bluebeetlept/renovate-config`.
+- `php.json`: Renovate updates lock files on the PHP version the docker-dev containers run (8.4), not the newest one `composer.json` allows. Add `local>bluebeetlept/renovate-config:php` to the `extends` of a repository developed in docker-dev, and bump it here by hand when the containers move to a new PHP version.
+
 ## Shared workflows
 
 ### Biome migrate (`.github/workflows/biome-migrate.yml`)
@@ -43,4 +48,3 @@ jobs:
 The commit is pushed with `BOT_TOKEN` so the pull request's checks run again on it (a push with the job's own token wouldn't start them). Give it a fine-grained token with only *Contents: read and write* on the calling repositories. It is only ever handed to the push step: the checkout keeps no credentials and Biome runs with install scripts off, so the npm package never sees it. Each organisation keeps that token as a `RENOVATE_PR_TOKEN` secret; on a free plan, organisation secrets don't reach private repositories, so a private repository there needs it as a repository secret. Once a commit that isn't Renovate's is on its branch, Renovate stops rebasing that pull request by itself.
 
 This repository is public, so any repository can call the workflow; it holds no secrets, they're passed in by the caller.
-
