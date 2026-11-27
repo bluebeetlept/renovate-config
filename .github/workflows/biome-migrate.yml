@@ -1,0 +1,74 @@
+name: Biome migrate
+
+# Called from a repository's Renovate pull requests that bump @biomejs/biome: runs
+# `biome migrate` at the bumped version and commits the updated configuration to the
+# same pull request, so the bump comes with its biome.json changes.
+#
+# Renovate (the hosted app) can't run commands on its branches itself, hence this.
+# Biome is public on npm, so it runs the exact pinned version with npx: no install,
+# no private registry, and the lock file is left alone.
+
+on:
+  workflow_call:
+    secrets:
+      BOT_TOKEN:
+        description: Token that pushes the commit, so the pull request's checks run again on it.
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Migrate Biome configuration
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 10
+
+    steps:
+      # The checkout reads with the job's own token and keeps no credentials, so the
+      # npm package run below can't find a token; BOT_TOKEN only enters the push step.
+      - name: Checkout the pull request branch
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Run biome migrate
+        env:
+          npm_config_ignore_scripts: "true"
+        run: |
+          version=$(node -p "const p = require('./package.json'); (p.devDependencies ?? {})['@biomejs/biome'] ?? (p.dependencies ?? {})['@biomejs/biome'] ?? ''")
+
+          if [ -z "$version" ]; then
+            echo "::error::@biomejs/biome is not in package.json."
+            exit 1
+          fi
+
+          npx --yes "@biomejs/biome@${version}" migrate --write
+
+      - name: Commit the updated configuration
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BRANCH: ${{ github.head_ref }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$(git status --porcelain -- biome.json biome.jsonc)" ]; then
+            echo "The Biome configuration is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for file in biome.json biome.jsonc; do
+            if [ -f "$file" ]; then
+              git add -- "$file"
+            fi
+          done
+
+          git commit -m "chore(deps): run biome migrate"
+          git push "https://x-access-token:${BOT_TOKEN}@github.com/${REPOSITORY}.git" "HEAD:refs/heads/${BRANCH}"
