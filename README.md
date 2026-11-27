@@ -16,3 +16,8 @@ Reference this config in your repository's `renovate.json`:
     "rangeStrategy": "auto"
 }
 ```
+
+## Presets
+
+- `default.json`: the shared settings, used with `local>bluebeetlept/renovate-config`.
+- `php.json`: Renovate updates lock files on the PHP version the docker-dev containers run (8.4), not the newest one `composer.json` allows. Add `local>bluebeetlept/renovate-config:php` to the `extends` of a repository developed in docker-dev, and bump it here by hand when the containers move to a new PHP version.
