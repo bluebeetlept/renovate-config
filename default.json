@@ -20,7 +20,7 @@
             "token": "{{ secrets.BLUEBEETLE_BOT_PAT }}"
         },
         {
-            "matchHost": "packages.eufaturo.pt",
+            "matchHost": "satis.bluebeetle.pt",
             "hostType": "packagist",
             "username": "eufaturo",
             "password": "{{ secrets.SATIS_PASSWORD }}"
